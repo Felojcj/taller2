@@ -4,30 +4,19 @@ import { useForm, Controller } from "react-hook-form";
 import MenuItem from "@mui/material/MenuItem";
 import Button from "@mui/material/Button";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 import { Categorie } from "../../models/categorie";
 
 const MainForm = () => {
   const { handleSubmit, control } = useForm();
   const [categories, setCategories] = useState<Categorie[]>([]);
+  const navigator = useNavigate();
 
   const onSubmit = (data: any) => {
-    if (data.difficulty !== "Any Difficulty") {
-      axios
-        .get(
-          `https://opentdb.com/api.php?amount=10&category=${data.categorie}&difficulty=${data.difficulty}`
-        )
-        .then((res) => {
-          console.log(res.data.results);
-        });
-    }
-    axios
-      .get(
-        `https://opentdb.com/api.php?amount=10&category=${data.categorie}`
-      )
-      .then((res) => {
-        console.log(res.data.results);
-      });
+    navigator("/questions", {
+      state: data,
+    });
   };
 
   const getCategories = () => {
@@ -52,11 +41,12 @@ const MainForm = () => {
             render={({ field: { onChange, value }, fieldState: { error } }) => (
               <TextField
                 id="outlined-basic"
-                label="Usuario"
+                label="User"
                 variant="outlined"
                 onChange={onChange}
                 value={value}
                 error={!!error}
+                helperText={error ? error.message : null}
                 style={{ minWidth: "18rem" }}
               />
             )}
@@ -67,7 +57,7 @@ const MainForm = () => {
             name="categorie"
             control={control}
             defaultValue=""
-            rules={{ required: "The user is required" }}
+            rules={{ required: "The categorie is required" }}
             render={({ field: { onChange, value }, fieldState: { error } }) => (
               <TextField
                 className="mb-3 mt-3"
@@ -76,6 +66,7 @@ const MainForm = () => {
                 label="Categoria"
                 onChange={onChange}
                 value={value}
+                helperText={error ? error.message : null}
                 error={!!error}
                 select
               >
@@ -93,7 +84,7 @@ const MainForm = () => {
             name="difficulty"
             control={control}
             defaultValue=""
-            rules={{ required: "The user is required" }}
+            rules={{ required: "The difficulty is required" }}
             render={({ field: { onChange, value }, fieldState: { error } }) => (
               <TextField
                 className="mb-3"
@@ -103,6 +94,7 @@ const MainForm = () => {
                 onChange={onChange}
                 value={value}
                 error={!!error}
+                helperText={error ? error.message : null}
                 select
               >
                 <MenuItem value="Any Difficulty">Any Difficulty</MenuItem>
