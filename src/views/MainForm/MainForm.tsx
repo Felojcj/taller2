@@ -6,11 +6,11 @@ import Button from "@mui/material/Button";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
-import { Categorie } from "../../models/categorie";
+import { Category } from "../../models/category";
 
 const MainForm = () => {
   const { handleSubmit, control } = useForm();
-  const [categories, setCategories] = useState<Categorie[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const navigator = useNavigate();
 
   const onSubmit = (data: any) => {
@@ -54,25 +54,25 @@ const MainForm = () => {
         </div>
         <div className="col-12">
           <Controller
-            name="categorie"
+            name="category"
             control={control}
             defaultValue=""
-            rules={{ required: "The categorie is required" }}
+            rules={{ required: "The category is required" }}
             render={({ field: { onChange, value }, fieldState: { error } }) => (
               <TextField
                 className="mb-3 mt-3"
-                name="categorie"
+                name="category"
                 style={{ minWidth: "18rem" }}
-                label="Categoria"
+                label="Category"
                 onChange={onChange}
                 value={value}
                 helperText={error ? error.message : null}
                 error={!!error}
                 select
               >
-                {categories.map((categorie: Categorie, index: number) => (
-                  <MenuItem key={index} value={categorie.id}>
-                    {categorie.name}
+                {categories.map((category: Category, index: number) => (
+                  <MenuItem key={index} value={category.id}>
+                    {category.name}
                   </MenuItem>
                 ))}
               </TextField>
@@ -90,14 +90,13 @@ const MainForm = () => {
                 className="mb-3"
                 name="difficulty"
                 style={{ minWidth: "18rem" }}
-                label="Dificultad"
+                label="Difficulty"
                 onChange={onChange}
                 value={value}
                 error={!!error}
                 helperText={error ? error.message : null}
                 select
               >
-                <MenuItem value="Any Difficulty">Any Difficulty</MenuItem>
                 <MenuItem value="easy">Easy</MenuItem>
                 <MenuItem value="medium">Medium</MenuItem>
                 <MenuItem value="heard">Hard</MenuItem>
@@ -107,7 +106,7 @@ const MainForm = () => {
         </div>
         <div className="col-12">
           <Button variant="contained" type="submit" className="mb-3">
-            Ingresar
+            Play
           </Button>
         </div>
       </form>
