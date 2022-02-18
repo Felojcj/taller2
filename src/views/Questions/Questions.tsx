@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import axios from "axios";
 import Typography from "@mui/material/Typography";
+import Button from "@mui/material/Button";
 
 const Questions = () => {
   const { state } = useLocation();
@@ -9,22 +10,44 @@ const Questions = () => {
     useState<{ user: string; difficulty: string }>();
   const [questions, setQuestions] = useState<any[]>([]);
   const [questionNumber, setQuestionNumber] = useState(0);
+  const [answers, setAnswers] = useState<any[]>([]);
   const prizes = [10000, 9000, 8000, 7000, 6000, 5000, 4000, 3000, 2000, 1000];
   const options2 = { currency: "USD" };
   const numberFormat2 = new Intl.NumberFormat("en-US", options2);
 
   useEffect(() => {
     const data: any = state;
+    const answersArray: any[] = [];
     setUserData(data);
+
     axios
       .get(
         `https://opentdb.com/api.php?amount=10&category=${data.category}&difficulty=${data.difficulty}&type=multiple`
       )
       .then((res) => {
         setQuestions(res.data.results);
-        console.log(res.data.results);
+        res.data.results[0].incorrect_answers.forEach(
+          (incorrectAnswer: string) => {
+            answersArray.push({
+              isCorrectAnswer: false,
+              answer: incorrectAnswer,
+            });
+          }
+        );
+        answersArray.push({
+          isCorrectAnswer: true,
+          answer: res.data.results[0].correct_answer,
+        });
+        setAnswers(answersArray);
+        console.log(res.data.results, answersArray);
       });
   }, []);
+
+  const questionChecker = (isCorrect: boolean) => {
+    if (isCorrect) {
+      alert("Es correcta");
+    }
+  };
 
   return (
     <div className="vh-100">
@@ -43,14 +66,25 @@ const Questions = () => {
         </Typography>
       </div>
       <div className="row m-0" style={{ height: "92%" }}>
-        <div className="col-9">
-          {
-            <Typography variant="h6" component="div">
-              {questionNumber !== undefined && questions.length > 0
-                ? questions[questionNumber].question.replace(/&quot;/g, '"')
-                : "This category does not have questions, please return to the previous screen and select another difficulty or category"}
-            </Typography>
-          }
+        <div className="col-9 d-flex flex-column justify-content-center">
+          <Typography variant="h6" component="div">
+            {questionNumber !== undefined && questions.length > 0
+              ? questions[questionNumber].question.replace(/&quot;/g, '"')
+              : "This category does not have questions, please return to the previous screen and select another difficulty or category"}
+          </Typography>
+          <div className="row">
+            {answers.map((answer) => (
+              <div className="col-6 p-2">
+                <Button
+                  variant="contained"
+                  style={{width: "100%"}}
+                  onClick={() => questionChecker(answer.isCorrectAnswer)}
+                >
+                  {answer.answer}
+                </Button>
+              </div>
+            ))}
+          </div>
         </div>
         <div className="col-3 p-5 border-start border-dark">
           {prizes.map((prize, index, prizes) => (
