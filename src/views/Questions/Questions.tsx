@@ -3,6 +3,7 @@ import { useLocation } from "react-router-dom";
 import axios from "axios";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
+import { useNavigate } from "react-router-dom";
 
 const Questions = () => {
   const { state } = useLocation();
@@ -11,9 +12,11 @@ const Questions = () => {
   const [questions, setQuestions] = useState<any[]>([]);
   const [questionNumber, setQuestionNumber] = useState(0);
   const [answers, setAnswers] = useState<any[]>([]);
+  const [question, setQuestion] = useState<string>("");
   const prizes = [10000, 9000, 8000, 7000, 6000, 5000, 4000, 3000, 2000, 1000];
   const options2 = { currency: "USD" };
   const numberFormat2 = new Intl.NumberFormat("en-US", options2);
+  const navigator = useNavigate();
 
   useEffect(() => {
     const data: any = state;
@@ -39,13 +42,44 @@ const Questions = () => {
           answer: res.data.results[0].correct_answer,
         });
         setAnswers(answersArray);
-        console.log(res.data.results, answersArray);
+        setQuestion(res.data.results[0].question.replace(/&quot;/g, '"'));
       });
   }, []);
 
-  const questionChecker = (isCorrect: boolean) => {
+  useEffect(() => {
+    const answersArray: any[] = [];
+    console.log(questionNumber);
+    if (questions.length > 0 && questionNumber < questions.length) {
+      questions[questionNumber].incorrect_answers.forEach(
+        (incorrectAnswer: string) => {
+          answersArray.push({
+            isCorrectAnswer: false,
+            answer: incorrectAnswer,
+          });
+        }
+      );
+      answersArray.push({
+        isCorrectAnswer: true,
+        answer: questions[questionNumber].correct_answer,
+      });
+      setAnswers(answersArray);
+      setQuestion(questions[questionNumber].question.replace(/&quot;/g, '"'));
+    } else if (questionNumber === questions.length) {
+      setAnswers([]);
+      setQuestion("You Win");
+    }
+  }, [questionNumber]);
+
+  const questionChecker = (isCorrect: boolean, element: any) => {
     if (isCorrect) {
-      alert("Es correcta");
+      element.classList.add("bg-success");
+      setTimeout(() => {
+        element.classList.remove("bg-success");
+        setQuestionNumber(questionNumber + 1);
+      }, 100);
+    } else {
+      element.classList.add("bg-danger");
+      setTimeout(() => navigator("/"), 2000);
     }
   };
 
@@ -68,17 +102,21 @@ const Questions = () => {
       <div className="row m-0" style={{ height: "92%" }}>
         <div className="col-9 d-flex flex-column justify-content-center">
           <Typography variant="h6" component="div">
-            {questionNumber !== undefined && questions.length > 0
-              ? questions[questionNumber].question.replace(/&quot;/g, '"')
+            {questionNumber !== undefined &&
+            questions.length > 0 &&
+            questionNumber <= questions.length
+              ? question
               : "This category does not have questions, please return to the previous screen and select another difficulty or category"}
           </Typography>
           <div className="row">
-            {answers.map((answer) => (
-              <div className="col-6 p-2">
+            {answers.map((answer, index) => (
+              <div className="col-6 p-2" key={index}>
                 <Button
                   variant="contained"
-                  style={{width: "100%"}}
-                  onClick={() => questionChecker(answer.isCorrectAnswer)}
+                  style={{ width: "100%" }}
+                  onClick={(event) =>
+                    questionChecker(answer.isCorrectAnswer, event.target)
+                  }
                 >
                   {answer.answer}
                 </Button>
@@ -88,7 +126,7 @@ const Questions = () => {
         </div>
         <div className="col-3 p-5 border-start border-dark">
           {prizes.map((prize, index, prizes) => (
-            <Typography variant="h5" component="div">
+            <Typography variant="h5" component="div" key={index}>
               {`${prizes.length - index} $${numberFormat2.format(prize)}`}
             </Typography>
           ))}
