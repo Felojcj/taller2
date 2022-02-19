@@ -14,6 +14,7 @@ const Questions = () => {
   const [answers, setAnswers] = useState<any[]>([]);
   const [question, setQuestion] = useState<string>("");
   const prizes = [10000, 9000, 8000, 7000, 6000, 5000, 4000, 3000, 2000, 1000];
+  const [earnings, setEarnings] = useState(0)
   const options2 = { currency: "USD" };
   const numberFormat2 = new Intl.NumberFormat("en-US", options2);
   const navigator = useNavigate();
@@ -64,9 +65,13 @@ const Questions = () => {
       });
       setAnswers(answersArray);
       setQuestion(questions[questionNumber].question.replace(/&quot;/g, '"'));
-    } else if (questionNumber === questions.length) {
+    } else if (questionNumber === questions.length && question.length > 0) {
       setAnswers([]);
       setQuestion("You Win");
+      const timer = setTimeout(() => {
+        navigator("/");
+      }, 5000);
+      return () => clearTimeout(timer);
     }
   }, [questionNumber]);
 
@@ -76,6 +81,7 @@ const Questions = () => {
       setTimeout(() => {
         element.classList.remove("bg-success");
         setQuestionNumber(questionNumber + 1);
+        setEarnings(earnings + (1000 * (questionNumber + 1)))
       }, 100);
     } else {
       element.classList.add("bg-danger");
@@ -96,7 +102,7 @@ const Questions = () => {
           Difficulty: {userData?.difficulty}
         </Typography>
         <Typography variant="h5" component="div">
-          Earnings: 0$
+          Earnings: {earnings}$
         </Typography>
       </div>
       <div className="row m-0" style={{ height: "92%" }}>
@@ -126,7 +132,13 @@ const Questions = () => {
         </div>
         <div className="col-3 p-5 border-start border-dark">
           {prizes.map((prize, index, prizes) => (
-            <Typography variant="h5" component="div" key={index}>
+            <Typography
+              variant="h5"
+              component="div"
+              key={index}
+              style={{width: "100%"}}
+              className={index === (questions.length - questionNumber) - 1 ? "border border-success" : ""}
+            >
               {`${prizes.length - index} $${numberFormat2.format(prize)}`}
             </Typography>
           ))}
